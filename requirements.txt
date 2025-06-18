@@ -1,3 +1,5 @@
 flask
 regex
 flask_paginate
+sqlite3
+pandas
