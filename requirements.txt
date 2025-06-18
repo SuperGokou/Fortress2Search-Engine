@@ -3,3 +3,4 @@ regex
 flask_paginate
 db-sqlite3
 pandas
+gunicorn
