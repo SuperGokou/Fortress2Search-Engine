@@ -1,5 +1,3 @@
 flask
 regex
 flask_paginate
-time
-string
