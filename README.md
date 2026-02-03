@@ -2,6 +2,8 @@
 
 A web-based search application for discovering and searching custom-named items from Team Fortress 2. Built with Flask and SQLite FTS5 for fast, relevant search results.
 
+**Demo** https://fortress2search-engine.onrender.com/
+
 ## Team Members
 
 - Ming Xia
@@ -204,7 +206,3 @@ Fortress2Search-Engine/
 | `/dataPage/<query>` | GET | Process search and display paginated results |
 | `/results` | GET | Alternative search endpoint with sort parameters |
 | `/groupPage` | GET | Display grouped item results |
-
-## License
-
-This project was developed for CIS 5210 coursework.
