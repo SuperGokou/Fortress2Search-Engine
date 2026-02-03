@@ -1,261 +1,235 @@
+"""Team Fortress 2 Item Search Engine - Flask Application."""
+
 from flask import Flask, render_template, request, redirect, url_for
-import searchEngine
-import autoComplete
 import re
 from flask_paginate import Pagination, get_page_args
+
+from src import search_engine, autocomplete
 
 app = Flask(__name__)
 
 
-def fliterList(Lists):
-    # tuple list to list
-    lists = [item for items in Lists for item in items]
-    newlist = []
-    for list in lists:
-        list = re.sub(r'\\', '', list)
-        newlist.append(list)
-    return newlist
+def filter_list(items):
+    """Convert tuple list to flat list and remove backslashes."""
+    flat_list = [item for row in items for item in row]
+    return [re.sub(r'\\', '', item) for item in flat_list]
 
 
-def newList(list, offset=0, per_page=10):
-    return list[offset: offset + per_page]
+def paginate_list(data, offset=0, per_page=10):
+    """Return a slice of the list for pagination."""
+    return data[offset: offset + per_page]
 
 
-def wordsCheck(inputlist):
-    if 'bm25' or 'tfidf' or 'view' or 'rel' in inputlist:
-        if "bm25" in inputlist:
-            searchE = 0
-        elif "tfidf" in inputlist:
-            searchE = 1
-        elif "view" in inputlist:
-            searchE = 2
-        else:
-            searchE = 5
-
-    return searchE
+def get_search_type(query_parts):
+    """Determine search type from query parts."""
+    if 'bm25' in query_parts:
+        return 0
+    elif 'tfidf' in query_parts:
+        return 1
+    elif 'view' in query_parts:
+        return 2
+    else:
+        return 5
 
 
 @app.route('/', methods=['POST', 'GET'])
-def homePage():  # put application's code here
+def home_page():
+    """Render the home page with search form."""
     if request.method == 'POST':
-        query = request.form.get(r'inputWords')
-        ad1 = request.form.get(r'class')
-        if ad1:
-            query = query + " " + ad1
-        else:
-            query = query + " " + 'None'
-        ad2 = request.form.get(r'quality')
-        if ad2:
-            query = query + " " + ad2
-        else:
-            query = query + " " + 'None'
-        ad3 = request.form.get(r'grade')
-        if ad3:
-            query = query + " " + ad3
-        else:
-            query = query + " " + 'None'
-        return redirect(url_for("dataPage", query=query))
+        query = request.form.get('inputWords', '')
+        ad1 = request.form.get('class') or 'None'
+        ad2 = request.form.get('quality') or 'None'
+        ad3 = request.form.get('grade') or 'None'
+
+        query = f"{query} {ad1} {ad2} {ad3}"
+        return redirect(url_for("data_page", query=query))
 
     elif request.method == 'GET':
-        auto = autoComplete.autoComplete()
-        auto = fliterList(auto)
-        return render_template('Index.html', languages=auto)
-    else:
-        return render_template('Index.html')
+        auto = autocomplete.get_suggestions()
+        auto = filter_list(auto)
+        return render_template('index.html', languages=auto)
+
+    return render_template('index.html')
 
 
 @app.route('/dataPage/<query>')
-def dataPage(query):
-    list = query.split()
-    relativeList = ['bm25', 'tfidf', 'view', 'rel']
-    newlist = [False for i in relativeList if i not in list]
+def data_page(query):
+    """Process search query and display results."""
+    query_parts = query.split()
+    search_keywords = ['bm25', 'tfidf', 'view', 'rel']
+    has_search_keyword = any(kw in query_parts for kw in search_keywords)
 
-    if 4 > len(newlist) > 0:
-        query = " ".join(list[:-1])
-        ad1 = 'None'
-        ad2 = 'None'
-        ad3 = 'None'
-    else:
-        query = " ".join(list[:-3])
-        ad3 = list[-1]
-        ad2 = list[-2]
-        ad1 = list[-3]
-
-    searchE = wordsCheck(list)
-
-    adFlag = 0
-    if ad1 != 'None':
-        if len(ad1) > 0:
-            adFlag = 1
-    if ad2 != 'None':
-        if len(ad2) > 0:
-            adFlag += 2
-    if ad3 != 'None':
-        if len(ad3) > 0:
-            adFlag += 4
-    if not query:
-        return render_template('Index.html')
-    else:
-        if searchE == 0:
-            rel, costtime = searchEngine.queryBM25Search(query)
-        elif searchE == 1:
-            rel, costtime = searchEngine.queryWikiIdSearch(query)
-        elif searchE == 2:
-            rel, costtime = searchEngine.queryFrqsearch(query)
+    if has_search_keyword and len(query_parts) >= 1:
+        if len(query_parts) <= 4:
+            search_query = " ".join(query_parts[:-1])
+            ad1 = 'None'
+            ad2 = 'None'
+            ad3 = 'None'
         else:
-            rel, costtime = searchEngine.querySearch(query)
-        if not rel:
-            return render_template('404.html')
-        else:
-            groups = []
-            for i in range(0, len(rel)):
-                flag = 0
-                for j in range(0, len(groups)):
-                    if (rel[i][0] in groups[j][0][0]):
-                        groups[j].append(rel[i])
-                        flag = 1
-                # Only ran if the item is not in a group already
-                if not flag:
-                    if adFlag == 0:
-                        groups.append([rel[i]])
-                    # Class
-                    elif adFlag == 1:
-                        if ad1 in rel[i][5]:
-                            groups.append([rel[i]])
-                    # Quality
-                    elif adFlag == 2:
-                        if ad2 in rel[i][2]:
-                            groups.append([rel[i]])
-                    # Quality & Class
-                    elif adFlag == 3:
-                        if ad1 in rel[i][5]:
-                            if ad2 in rel[i][2]:
-                                groups.append([rel[i]])
-                    # Grade
-                    elif adFlag == 4:
-                        if rel[i][3] != None:
-                            if ad3 in rel[i][3]:
-                                groups.append([rel[i]])
-                    # Class & Grade
-                    elif adFlag == 5:
-                        if rel[i][3] != None:
-                            if ad1 in rel[i][5]:
-                                if ad3 in rel[i][3]:
-                                    groups.append([rel[i]])
-                    # Quality & Grade
-                    elif adFlag == 6:
-                        if rel[i][3] != None:
-                            if ad2 in rel[i][2]:
-                                if ad3 in rel[i][3]:
-                                    groups.append([rel[i]])
-                    # Class & Quality & Grade
-                    elif adFlag == 7:
-                        if rel[i][3] != None:
-                            if ad1 in rel[i][5]:
-                                if ad2 in rel[i][2]:
-                                    if ad3 in rel[i][3]:
-                                        groups.append([rel[i]])
+            search_query = " ".join(query_parts[:-4])
+            ad3 = query_parts[-2]
+            ad2 = query_parts[-3]
+            ad1 = query_parts[-4]
+    else:
+        search_query = " ".join(query_parts[:-3]) if len(query_parts) > 3 else ""
+        ad3 = query_parts[-1] if len(query_parts) >= 1 else 'None'
+        ad2 = query_parts[-2] if len(query_parts) >= 2 else 'None'
+        ad1 = query_parts[-3] if len(query_parts) >= 3 else 'None'
 
-            page, per_page, offset = get_page_args(page_parameter='page',
-                                                   per_page_parameter='per_page')
-            total = len(groups)
-            groups = newList(groups, offset=offset, per_page=per_page)
-            pagination = Pagination(page=page,
-                                    per_page=per_page,
-                                    offset=offset,
-                                    total=total,
-                                    css_framework='foundation',
-                                    record_name='groups')
+    search_type = get_search_type(query_parts)
 
-            datas = groups[:3]
-            print(datas)
-            relist = []
-            for data in datas:
-                biglist = []
-                for items in data:
-                    tuplelist = []
-                    for item in items:
-                        item = str(item)
-                        string = item.replace('<b>', '')
-                        string = string.replace('</b>', '')
-                        tuplelist.append(string)
-                    tuplelist = tuple(tuplelist)
-                    biglist.append(tuplelist)
-                relist.append(biglist)
-            print(relist)
+    ad_flag = 0
+    if ad1 != 'None' and ad1:
+        ad_flag = 1
+    if ad2 != 'None' and ad2:
+        ad_flag += 2
+    if ad3 != 'None' and ad3:
+        ad_flag += 4
 
-            return render_template('Result.html', results=groups, searchquery=query, costTime=round(costtime, 5),
-                                   number=total, similar_query1=query, newresults=relist,
-                                   pagination=pagination, page=page, per_page=per_page)
+    if not search_query:
+        return render_template('index.html')
+
+    if search_type == 0:
+        rel, costtime = search_engine.query_bm25_search(search_query)
+    elif search_type == 1:
+        rel, costtime = search_engine.query_wiki_id_search(search_query)
+    elif search_type == 2:
+        rel, costtime = search_engine.query_frequency_search(search_query)
+    else:
+        rel, costtime = search_engine.query_search(search_query)
+
+    if not rel:
+        return render_template('404.html')
+
+    groups = []
+    for item in rel:
+        flag = 0
+        for group in groups:
+            if item[0] in group[0][0]:
+                group.append(item)
+                flag = 1
+                break
+
+        if not flag:
+            should_add = False
+            if ad_flag == 0:
+                should_add = True
+            elif ad_flag == 1:
+                should_add = ad1 in item[5]
+            elif ad_flag == 2:
+                should_add = ad2 in item[2]
+            elif ad_flag == 3:
+                should_add = ad1 in item[5] and ad2 in item[2]
+            elif ad_flag == 4:
+                should_add = item[3] is not None and ad3 in item[3]
+            elif ad_flag == 5:
+                should_add = item[3] is not None and ad1 in item[5] and ad3 in item[3]
+            elif ad_flag == 6:
+                should_add = item[3] is not None and ad2 in item[2] and ad3 in item[3]
+            elif ad_flag == 7:
+                should_add = (item[3] is not None and ad1 in item[5] and
+                              ad2 in item[2] and ad3 in item[3])
+
+            if should_add:
+                groups.append([item])
+
+    page, per_page, offset = get_page_args(page_parameter='page',
+                                           per_page_parameter='per_page')
+    total = len(groups)
+    groups = paginate_list(groups, offset=offset, per_page=per_page)
+    pagination = Pagination(page=page,
+                            per_page=per_page,
+                            offset=offset,
+                            total=total,
+                            css_framework='foundation',
+                            record_name='groups')
+
+    datas = groups[:3]
+    relist = []
+    for data in datas:
+        biglist = []
+        for items in data:
+            tuplelist = []
+            for item in items:
+                item_str = str(item)
+                clean_str = item_str.replace('<b>', '').replace('</b>', '')
+                tuplelist.append(clean_str)
+            biglist.append(tuple(tuplelist))
+        relist.append(biglist)
+
+    return render_template('result.html', results=groups, searchquery=search_query,
+                           costTime=round(costtime, 5), number=total,
+                           similar_query1=search_query, newresults=relist,
+                           pagination=pagination, page=page, per_page=per_page)
+
 
 @app.route('/groupPage')
-def groupPage():
-    group = request.args.get('group')
+def group_page():
+    """Display grouped item results."""
+    group = request.args.get('group', '')
 
-    group = group.translate({ ord('['): None })
-    group = group.translate({ ord('('): None })
-    group = group.translate({ ord(')'): None })
-    group = group.translate({ ord(']'): None })
-    group = group.translate({ ord('}'): None })
-    group = group.translate({ ord('{'): None })
-    group = group.translate({ ord('\''): None })
-    group = group.translate({ ord('"'): None })
-    #Rebuild the Groups
-    print(group)
+    chars_to_remove = '[](){}\'\"'
+    for char in chars_to_remove:
+        group = group.replace(char, '')
+
     items = group.split(',')
-    print(items)
-    group = []
+    group_list = []
     i = 0
+
     while i < len(items):
-        j = 0
         temp = []
-        while j <= 9:
-            print(i)
-            print(j)
-            if(i+j > len(items)-1):
+        for j in range(10):
+            if i + j > len(items) - 1:
                 break
-            if(items[i+j] == None):
+            if items[i + j] is None:
                 break
-            if(items[i+j][0] == ' '):
-                items[i+j] = items[i+j][1:]
-            items[i+j] = re.sub('\\\\n', '', items[i+j])
-            items[i+j] = items[i+j].translate({ ord('\\'): None })
-            temp.append(items[i+j])
-            j += 1
-        if(len(group) > 50):
-            if(group[0][0] == temp[0][0]):
-                group.append(temp)
+
+            item = items[i + j]
+            if item and item[0] == ' ':
+                item = item[1:]
+            item = re.sub(r'\\n', '', item)
+            item = item.replace('\\', '')
+            temp.append(item)
+
+        if len(group_list) > 50:
+            if temp and group_list[0][0] == temp[0][0]:
+                group_list.append(temp)
         else:
-            group.append(temp)
+            group_list.append(temp)
         i += 10
 
     page, per_page, offset = get_page_args(page_parameter='page',
-                                                   per_page_parameter='per_page')
+                                           per_page_parameter='per_page')
     costtime = 0
-    query = ""
-    total = len(group)
-    groups = newList(group, offset=offset, per_page=per_page)
+    search_query = ""
+    total = len(group_list)
+    groups = paginate_list(group_list, offset=offset, per_page=per_page)
     pagination = Pagination(page=page,
-                                    per_page=per_page,
-                                    offset=offset,
-                                    total=total,
-                                    css_framework='foundation',
-                                    record_name='groups')
-    return render_template('Groups.html', results=groups, searchquery=query, costTime=round(costtime, 5),
-                                   number=total, similar_query1=query, similar_query2=query,
-                                   pagination=pagination, page=page, per_page=per_page)
+                            per_page=per_page,
+                            offset=offset,
+                            total=total,
+                            css_framework='foundation',
+                            record_name='groups')
+
+    return render_template('groups.html', results=groups, searchquery=search_query,
+                           costTime=round(costtime, 5), number=total,
+                           similar_query1=search_query, similar_query2=search_query,
+                           pagination=pagination, page=page, per_page=per_page)
+
+
 @app.route('/results')
-def resultPage():  # put application's code here
-    query = request.args.get('query')
+def result_page():
+    """Handle search results with sorting options."""
+    query = request.args.get('query', '')
     sortby = request.args.get('order')
 
     if not sortby:
-        query = query + " " + "rel"
+        query = query + " rel"
     else:
         query = query + " " + sortby
 
-    return redirect(url_for("dataPage", query=query))
+    return redirect(url_for("data_page", query=query))
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python app.py:*)",
+      "Bash(pip install:*)",
+      "Bash(pip show:*)",
+      "Bash(\"D:\\\\Study\\\\Anaconda3\\\\envs\\\\tf\\\\python.exe\" -c \"from src import search_engine, autocomplete, database; print\\(''All imports successful!''\\)\")",
+      "Bash(\"D:\\\\Study\\\\Anaconda3\\\\envs\\\\tf\\\\python.exe\" app.py)",
+      "Bash(timeout:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}

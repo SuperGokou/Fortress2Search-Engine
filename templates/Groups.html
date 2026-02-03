@@ -2,11 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Result</title>
-    <link href="/static/css_templates/style.css" rel="stylesheet" type="text/css"/>
-    <link href="/static/css_templates/result.css" rel="stylesheet" type="text/css"/>
-    <link href="/static/css_templates/foundation.css" rel="stylesheet" type="text/css"/>
-
+    <title>Group Results - Team Fortress 2</title>
+    <link href="/static/css/style.css" rel="stylesheet" type="text/css">
+    <link href="/static/css/result.css" rel="stylesheet" type="text/css">
+    <link href="/static/css/foundation.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 
@@ -16,8 +15,8 @@
         </a>
         <div class="inputArea">
             <form method="post" action="/" enctype="multipart/form-data">
-                <input type="text" name="inputWords" class="searchInput", value="{{ searchquery }}"/>
-                <button class="searchButton" type="submit", value="Search"></button>
+                <input type="text" name="inputWords" class="searchInput" value="{{ searchquery }}">
+                <button class="searchButton" type="submit" value="Search"></button>
             </form>
         </div>
     </div>
@@ -26,43 +25,43 @@
         <div id="main">
             <div class="sideBar">
 
-                <div class="subfield"></div>
+                <div class="subfield">Sort By</div>
                 <ul class="subfieldContext">
                     <li>
                         <a href="/results?query={{ searchquery }}&order=bm25"
-                           class="byDependence"></a>
+                           class="byDependence">BM25</a>
                     </li>
                     <li>
-                        <a href="/results?query={{ searchquery }}&&order=tfidf"
-                           class="byTime"></a>
-
+                        <a href="/results?query={{ searchquery }}&order=tfidf"
+                           class="byTime">wikiID</a>
                     </li>
                     <li>
                         <a href="/results?query={{ searchquery }}&order=view"
-                           class="byDependence"></a>
+                           class="byDependence">Frequently</a>
                     </li>
                 </ul>
                 <div class="subfield">Relative Link</div>
                 <ul class="subfieldContext">
                     <li>
                         <span class="name">
-                            <a target="_blank" href="https://www.wiki.com/">
-                            &nbsp;Wiki Search
+                            <a target="_blank" href="https://wiki.teamfortress.com/">
+                            Wiki Search
                             </a>
                         </span>
                     </li>
                     <li>
                         <span class="name">
                             <a target="_blank" href="https://www.google.com/">
-                                &nbsp;Google
+                                Google
                             </a>
                         </span>
                     </li>
                     <li>
                         <span class="name">
                             <a href="/">
-                                &nbsp;Tf2 Advanced Search
-                            </a></span>
+                                TF2 Advanced Search
+                            </a>
+                        </span>
                     </li>
                 </ul>
                 <div class="sideBarShowHide">
@@ -72,33 +71,33 @@
 
             <div class="resultArea">
                 <p class="resultTotal">
-                    <span class="info">About&nbsp;<span class="totalResult">{{ number }}</span>
-                        &nbsp;results (<span class="time">{{ costTime }}</span>seconds)</span>
+                    <span class="info">About <span class="totalResult">{{ number }}</span>
+                        results (<span class="time">{{ costTime }}</span> seconds)</span>
                         {{ pagination.info }}
                 </p>
 
                 <div class="resultList" id="resultList">
                     {% if number == 0 %}
-                        <p>Sorry ! No Result</p>
-                        <p>Please Check <a target="_blank" href="https://steamcommunity.com/ ">STEAM</a> Official Website</p>
+                        <p>Sorry! No Result</p>
+                        <p>Please Check <a target="_blank" href="https://steamcommunity.com/">STEAM</a> Official Website</p>
                     {% endif %}
 
                     {% for result in results %}
                         {{ loop.index + pagination.skip }}
                         <div class="resultItem">
                             <div class="itemHead">
-                                <img src="https://steamcommunity-a.akamaihd.net/economy/image/{{result[9]}}" width="100" height="auto">
+                                <img src="https://steamcommunity-a.akamaihd.net/economy/image/{{ result[9] }}" width="100" height="auto" alt="Item thumbnail">
                                 <a href="{{ result[-3]|safe }}" target="_blank" class="title">
-                                    {{ result[1]|safe}}
+                                    {{ result[1]|safe }}
                                 </a>
                                 <span class="divsion"></span>
                                 <span class="dependValue">
-                            	<span class="label"> wikiLink:</span>
-                                <span class="value"><a href="https://wiki.teamfortress.com/scripts/itemredirect.php?id={{result[6]}}" target="_blank">Team Fortress 2 Wiki</a></span>
-                            </span>
+                                    <span class="label">wikiLink:</span>
+                                    <span class="value"><a href="https://wiki.teamfortress.com/scripts/itemredirect.php?id={{ result[6] }}" target="_blank">Team Fortress 2 Wiki</a></span>
+                                </span>
                             </div>
                             <div class="itemBody">
-                                <span class="label">Description: </span>
+                                <span class="label">Description:</span>
                                 {{ result[3]|safe }}
                                 <a href="{{ result[-3]|safe }}" target="_blank">
                                     <span class="text">more</span>
@@ -106,23 +105,19 @@
                                 </a>
                             </div>
                             <div class="itemFoot">
-                                <span class="info">Quality:  <span class="value">{{ result[2]|safe}}</span> </span>
-                                <span class="value">Class: <span class="value">{{ result[5]|safe }}  </span> </span>
-                                <span class="value">OwnerSteamId: </a> <span class="value">{{ result[-2]|safe}}   </span> </span>
+                                <span class="info">Quality: <span class="value">{{ result[2]|safe }}</span></span>
+                                <span class="value">Class: <span class="value">{{ result[5]|safe }}</span></span>
+                                <span class="value">OwnerSteamId: <span class="value">{{ result[-2]|safe }}</span></span>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
-            {{ pagination.links }}
-        </div><!-- End of main -->
-
-    </div><!--End of bd-->
+                {{ pagination.links }}
+            </div>
         </div>
     </div>
 
-
-<div id="foot">Copyright &copy; Ming Xia, Jack Knudson</div>
-
+    <div id="foot">Copyright Ming Xia, Jack Knudson</div>
 
 </body>
 </html>

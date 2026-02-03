@@ -2,16 +2,16 @@
 <html lang="en">
   <head>
       <meta charset="UTF-8">
-      <title>Homepage</title>
-      <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet" />
-      <link href="static/css_templates/main.css" rel="stylesheet" />
-      <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
-      <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css" rel="stylesheet" type="text/css"/>
+      <title>Team Fortress 2 Search Engine</title>
+      <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+      <link href="/static/css/main.css" rel="stylesheet">
+      <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/ui-lightness/jquery-ui.css" rel="stylesheet" type="text/css">
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
   </head>
   <body>
     <div class="s007">
-        <form method="post" action="#" enctype="multipart/form-data">
+        <form method="post" action="/" enctype="multipart/form-data">
         <div class="inner-form">
           <div class="basic-search">
             <div class="input-field">
@@ -20,16 +20,14 @@
                   <path d="M18.869 19.162l-5.943-6.484c1.339-1.401 2.075-3.233 2.075-5.178 0-2.003-0.78-3.887-2.197-5.303s-3.3-2.197-5.303-2.197-3.887 0.78-5.303 2.197-2.197 3.3-2.197 5.303 0.78 3.887 2.197 5.303 3.3 2.197 5.303 2.197c1.726 0 3.362-0.579 4.688-1.645l5.943 6.483c0.099 0.108 0.233 0.162 0.369 0.162 0.121 0 0.242-0.043 0.338-0.131 0.204-0.187 0.217-0.503 0.031-0.706zM1 7.5c0-3.584 2.916-6.5 6.5-6.5s6.5 2.916 6.5 6.5-2.916 6.5-6.5 6.5-6.5-2.916-6.5-6.5z"></path>
                 </svg>
               </div>
-                <input type="text" name="inputWords" id = "tags" class="searchInput">
-                <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-                <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+                <input type="text" name="inputWords" id="tags" class="searchInput" placeholder="Search items...">
               <div class="result-count">
                 <span>Max</span>100 Words</div>
             </div>
               <script>
                     var availableTags = [
                         {% for language in languages %}
-                            "{{language|safe}}",
+                            "{{ language|safe }}",
                         {% endfor %}
                         ];
                     $("#tags").autocomplete({
@@ -47,15 +45,15 @@
                 <div class="input-select">
                   <select data-trigger="" name="class">
                     <option placeholder="" value="">Class</option>
-                    <option>Scout</option>
-                    <option>Soldier</option>
-                    <option>Pyro</option>
-                    <option>Demoman</option>
-                    <option>Heavy</option>
-                    <option>Engineer</option>
-                    <option>Sniper</option>
-                    <option>Medic</option>
-                    <option>Spy</option>
+                    <option value="Scout">Scout</option>
+                    <option value="Soldier">Soldier</option>
+                    <option value="Pyro">Pyro</option>
+                    <option value="Demoman">Demoman</option>
+                    <option value="Heavy">Heavy</option>
+                    <option value="Engineer">Engineer</option>
+                    <option value="Sniper">Sniper</option>
+                    <option value="Medic">Medic</option>
+                    <option value="Spy">Spy</option>
                   </select>
                 </div>
               </div>
@@ -63,15 +61,15 @@
                 <div class="input-select">
                   <select data-trigger="" name="quality">
                     <option placeholder="" value="">Quality</option>
-                    <option>Unique</option>
-                    <option>Decorated Weapon</option>
-                    <option>Strange</option>
-                    <option>Vintage</option>
-                    <option>Genuine</option>
-                    <option>Unusual</option>
-                    <option>Haunted</option>
-                    <option>Collector's</option>
-                    <option>Self-Made</option>
+                    <option value="Unique">Unique</option>
+                    <option value="Decorated Weapon">Decorated Weapon</option>
+                    <option value="Strange">Strange</option>
+                    <option value="Vintage">Vintage</option>
+                    <option value="Genuine">Genuine</option>
+                    <option value="Unusual">Unusual</option>
+                    <option value="Haunted">Haunted</option>
+                    <option value="Collector's">Collector's</option>
+                    <option value="Self-Made">Self-Made</option>
                   </select>
                 </div>
               </div>
@@ -79,30 +77,30 @@
                 <div class="input-select">
                   <select data-trigger="" name="grade">
                     <option placeholder="" value="">Grade</option>
-                    <option>Mercenary</option>
-                    <option>Commando</option>
-                    <option>Civilian</option>
-                    <option>Assassin</option>
-                    <option>Freelance</option>
-                    <option>Elite</option>
+                    <option value="Mercenary">Mercenary</option>
+                    <option value="Commando">Commando</option>
+                    <option value="Civilian">Civilian</option>
+                    <option value="Assassin">Assassin</option>
+                    <option value="Freelance">Freelance</option>
+                    <option value="Elite">Elite</option>
                   </select>
                 </div>
               </div>
             </div>
             <div class="row third">
               <div class="input-field">
-                <button class="searchButton" type="submit", value="Search"></button>
-                <button class="resetButton" type = "reset" id="delete"></button>
+                <button class="searchButton" type="submit" value="Search"></button>
+                <button class="resetButton" type="reset" id="delete"></button>
               </div>
             </div>
           </div>
         </div>
       </form>
     </div>
-    <script src="js/choices.js"></script>
+    <script src="/static/js/choices.js"></script>
     <script>
       const customSelects = document.querySelectorAll("select");
-      const deleteBtn = document.getElementById('delete')
+      const deleteBtn = document.getElementById('delete');
       const choices = new Choices('select',
       {
         searchEnabled: false,
@@ -115,22 +113,22 @@
         {
           if (event.detail.value)
           {
-            let parent = this.parentNode.parentNode
-            parent.classList.add('valid')
-            parent.classList.remove('invalid')
+            let parent = this.parentNode.parentNode;
+            parent.classList.add('valid');
+            parent.classList.remove('invalid');
           }
           else
           {
-            let parent = this.parentNode.parentNode
-            parent.classList.add('invalid')
-            parent.classList.remove('valid')
+            let parent = this.parentNode.parentNode;
+            parent.classList.add('invalid');
+            parent.classList.remove('valid');
           }
         }, false);
       }
       deleteBtn.addEventListener("click", function(e)
       {
-        e.preventDefault()
-        const deleteAll = document.querySelectorAll('.choices__button')
+        e.preventDefault();
+        const deleteAll = document.querySelectorAll('.choices__button');
         for (let i = 0; i < deleteAll.length; i++)
         {
           deleteAll[i].click();
@@ -138,5 +136,5 @@
       });
 
     </script>
-  </body><!-- This templates was made by Colorlib (https://colorlib.com) -->
+  </body>
 </html>
