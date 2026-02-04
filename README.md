@@ -2,7 +2,7 @@
 
 A web-based search application for discovering and searching custom-named items from Team Fortress 2. Built with Flask and SQLite FTS5 for fast, relevant search results.
 
-**Demo** https://fortress2search-engine.onrender.com/
+**[Demo](https://fortress2search-engine.onrender.com/)**
 
 ## Team Members
 
